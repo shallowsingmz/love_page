@@ -272,6 +272,34 @@
             font-weight: 600;
         }
 
+        /* 【修改点2】查看信件按钮样式 */
+        .view-letter-btn {
+            display: block;
+            width: 100%;
+            max-width: 280px;
+            margin: 30px auto;
+            padding: 16px 32px;
+            background: linear-gradient(135deg, var(--accent-rose), var(--accent-pink));
+            color: white;
+            border: none;
+            border-radius: 30px;
+            font-family: 'Noto Serif SC', serif;
+            font-size: 1.1rem;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(233, 30, 99, 0.4);
+            transition: all 0.3s ease;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .view-letter-btn:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 8px 30px rgba(233, 30, 99, 0.5);
+        }
+
+        .view-letter-btn.hidden {
+            display: none;
+        }
+
         /* 信件内容 */
         .letter-body {
             min-height: 300px;
@@ -281,6 +309,16 @@
             line-height: 2;
             font-size: 1.1rem;
             color: var(--text-dark);
+        }
+
+        /* 【修改点2】信件初始隐藏状态 */
+        .letter-body.hidden {
+            display: none;
+        }
+
+        .letter-body.visible {
+            display: block;
+            animation: fadeInUp 0.8s ease-out;
         }
 
         .letter-body::-webkit-scrollbar {
@@ -333,6 +371,7 @@
 
         .postscript {
             margin-top: 30px;
+            /*margin-bottom: 35px;   /*【修改点1】增加与下方日期的间距，可调整此值（如 25px、45px 等） */
             padding: 20px;
             background: linear-gradient(135deg, rgba(255, 182, 193, 0.2), rgba(93, 179, 196, 0.1));
             border-radius: 12px;
@@ -517,16 +556,15 @@
             <div class="corner-deco top-left"></div>
             <div class="corner-deco bottom-right"></div>
 
-            <div class="postscript">
-                <p>P.S. 点击页面边缘 和 上方的爱心，稍等片刻，会有惊喜哦~</p>
-            </div>
-
             <header class="letter-header">
                 <p class="letter-date">写于 二月十四日 情人节</p>
                 <h2 class="letter-greeting">亲爱的小丁宝贝：</h2>
             </header>
 
-            <div class="letter-body">
+            <!-- 【修改点2】点击查看信件按钮 -->
+            <button class="view-letter-btn" id="view-letter-btn">💌 点击查看信件</button>
+
+            <div class="letter-body hidden" id="letter-body">
                 <div class="letter-content" id="letter-content">
                     <!-- 信件内容将通过打字机效果显示 -->
                 </div>
@@ -537,6 +575,10 @@
                 <p class="signature">永远爱你的主人</p>
                 <p style="font-family: 'Dancing Script', cursive; font-size: 2.5rem; color: var(--accent-pink);">Your Love</p>
             </footer>
+
+            <div class="postscript">
+                <p>P.S. 点击页面边缘 和 上方的爱心，稍等片刻，会有惊喜哦~</p>
+            </div>
 
         </article>
 
@@ -617,6 +659,8 @@
         let currentCharIndex = 0;
         const letterContent = document.getElementById('letter-content');
         const typingCursor = document.getElementById('typing-cursor');
+        const letterBody = document.getElementById('letter-body');  // 【修改点2】信件正文容器
+        const viewLetterBtn = document.getElementById('view-letter-btn');  // 【修改点2】查看信件按钮
         const musicBtn = document.getElementById('music-btn');
         const bgMusic = document.getElementById('bg-music');
         const fireworkBtn = document.getElementById('firework-btn');
@@ -641,14 +685,14 @@
                 currentCharIndex++;
                 
                 // 根据字符类型调整延迟
-                let delay = 50;
+                let delay = 60;
                 const char = loveLetter.charAt(currentCharIndex - 1);
                 if (char === '。' || char === '！' || char === '？') {
                     delay = 300;
                 } else if (char === '，' || char === '、') {
                     delay = 150;
                 } else if (char === '\n') {
-                    delay = 200;
+                    delay = 260;
                 }
                 
                 typingTimeout = setTimeout(typeWriter, delay);
@@ -882,13 +926,42 @@
             launchFirework(e.clientX, e.clientY);
         });
 
+        // 【修改点2】点击按钮展开信件
+        function showLetter() {
+            viewLetterBtn.classList.add('hidden');  // 隐藏按钮
+            letterBody.classList.remove('hidden');  // 移除隐藏类
+            letterBody.classList.add('visible');   // 添加显示动画类
+            typingCursor.style.display = 'inline-block';  // 显示光标
+            // 延迟开始打字
+            setTimeout(typeWriter, 300);
+        }
+
+        // 【修改点2】重播信件（重置按钮状态）
+        function replayLetter() {
+            if (typingTimeout) {
+                clearTimeout(typingTimeout);
+            }
+            currentCharIndex = 0;
+            letterContent.textContent = '';
+            // 如果信件已隐藏，先显示
+            if (letterBody.classList.contains('hidden')) {
+                letterBody.classList.remove('hidden');
+                letterBody.classList.add('visible');
+            }
+            typingCursor.style.display = 'inline-block';
+            typeWriter();
+        }
+
         // 初始化
         document.addEventListener('DOMContentLoaded', function() {
             startHearts();
             animateFireworks();
             
-            // 延迟开始打字
-            setTimeout(typeWriter, 1000);
+            // 【修改点2】不再自动开始打字，等待用户点击按钮
+            // setTimeout(typeWriter, 1000);  // 已移除
+            
+            // 【修改点2】绑定查看信件按钮事件
+            viewLetterBtn.addEventListener('click', showLetter);
             
             // 初始烟花
             setTimeout(() => {
