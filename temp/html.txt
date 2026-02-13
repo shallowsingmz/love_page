@@ -560,14 +560,14 @@
                 <h2 class="letter-greeting">亲爱的宝贝：</h2>
             </header>
 
-            <!-- “点击查看信件”按钮 -->
+            <!-- 【修改点2】点击查看信件按钮 -->
             <button class="view-letter-btn" id="view-letter-btn">💌 点击查看信件</button>
 
             <div class="letter-body hidden" id="letter-body">
                 <div class="letter-content" id="letter-content">
                     <!-- 信件内容将通过打字机效果显示 -->
-                    <span class="typing-cursor" id="typing-cursor"></span> <!-- 光标跟随打字 -->
                 </div>
+                <span class="typing-cursor" id="typing-cursor"></span>
             </div>
 
             <footer class="letter-footer">
@@ -680,9 +680,7 @@
         // 打字机效果
         function typeWriter() {
             if (currentCharIndex < loveLetter.length) {
-                // 在光标前插入文字节点，使光标跟随文字
-                const textNode = document.createTextNode(loveLetter.charAt(currentCharIndex));
-                letterContent.insertBefore(textNode, typingCursor);
+                letterContent.textContent += loveLetter.charAt(currentCharIndex);
                 currentCharIndex++;
                 
                 // 根据字符类型调整延迟
@@ -708,10 +706,7 @@
                 clearTimeout(typingTimeout);
             }
             currentCharIndex = 0;
-            // 清除所有文字节点，但保留光标元素
-            while (letterContent.firstChild && letterContent.firstChild !== typingCursor) {
-                letterContent.removeChild(letterContent.firstChild);
-            }
+            letterContent.textContent = '';
             typingCursor.style.display = 'inline-block';
             typeWriter();
         }
