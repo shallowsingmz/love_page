@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>致我最爱的你 - 情人节快乐</title>
+    <title>致我最爱的你 - 小丁宝宝</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Noto+Serif+SC:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
@@ -272,7 +272,7 @@
             font-weight: 600;
         }
 
-        /* “查看信件”按钮样式 */
+        /* "查看信件"按钮样式 */
         .view-letter-btn {
             display: block;
             width: 100%;
@@ -557,21 +557,21 @@
 
             <header class="letter-header">
                 <p class="letter-date">写于 二月十四日 情人节</p>
-                <h2 class="letter-greeting">亲爱的宝贝：</h2>
+                <h2 class="letter-greeting">亲爱的小丁宝贝：</h2>
             </header>
 
-            <!-- 【修改点2】点击查看信件按钮 -->
+            <!-- "点击查看信件"按钮 -->
             <button class="view-letter-btn" id="view-letter-btn">💌 点击查看信件</button>
 
             <div class="letter-body hidden" id="letter-body">
                 <div class="letter-content" id="letter-content">
                     <!-- 信件内容将通过打字机效果显示 -->
+                    <span class="typing-cursor" id="typing-cursor"></span> <!-- 光标跟随打字 -->
                 </div>
-                <span class="typing-cursor" id="typing-cursor"></span>
             </div>
 
             <footer class="letter-footer">
-                <p class="signature">永远爱你的</p>
+                <p class="signature">永远爱你的主人</p>
                 <p style="font-family: 'Dancing Script', cursive; font-size: 2.5rem; color: var(--accent-pink);">Your Love</p>
             </footer>
 
@@ -629,11 +629,11 @@
         // ==========================================
         const loveLetter = `今天是情人节，我想用这封信，把平时说不出口的话都告诉你。
 
-还记得我们第一次见面吗？那时候我就觉得，这个女孩好特别，她的笑容像阳光一样温暖，让人忍不住想要靠近。
+还记得我们第一次见面吗？那时候我就觉得，这个男孩好特别，他的笑容像阳光一样温暖，让人忍不住想要靠近。
 
 后来我们在一起了，每一天都像是被上天眷顾着。你的每一个小表情、每一次撒娇、每一句关心的话，我都珍藏在心里最柔软的地方。
 
-我喜欢看着你吃东西时满足的样子，喜欢你认真工作时微微皱起的眉头，喜欢你在阳光下眯着眼睛笑，喜欢你的一切。
+我喜欢看着你吃东西时满足的样子，喜欢你认真学习时微微皱起的眉头，喜欢你在阳光下眯着眼睛笑，喜欢你的一切。
 
 这一年里，我们一起经历了很多。有过欢笑，也有过小争吵，但每一次和好，都让我更加确定——你就是我想要守护一辈子的人。
 
@@ -643,10 +643,10 @@
 
 宝贝，我爱你，不是说说而已。这份爱，会随着时间越来越深，越来越浓。
 
-情人节快乐，我的小公主。愿我们的爱情，永远像今天一样甜蜜。
+情人节快乐，我的小宝贝。愿我们的爱情，永远像今天一样甜蜜。
 
  Forever Yours,
- 你的爱人`;
+ 你爱的主人`;
 
         // ==========================================
         // 以下是程序代码，一般不需要修改
@@ -680,11 +680,13 @@
         // 打字机效果
         function typeWriter() {
             if (currentCharIndex < loveLetter.length) {
-                letterContent.textContent += loveLetter.charAt(currentCharIndex);
+                // 在光标前插入文字节点，使光标跟随文字
+                const textNode = document.createTextNode(loveLetter.charAt(currentCharIndex));
+                letterContent.insertBefore(textNode, typingCursor);
                 currentCharIndex++;
                 
                 // 根据字符类型调整延迟
-                let delay = 60;
+                let delay = 90;
                 const char = loveLetter.charAt(currentCharIndex - 1);
                 if (char === '。' || char === '！' || char === '？') {
                     delay = 300;
@@ -706,7 +708,10 @@
                 clearTimeout(typingTimeout);
             }
             currentCharIndex = 0;
-            letterContent.textContent = '';
+            // 清除所有文字节点，但保留光标元素
+            while (letterContent.firstChild && letterContent.firstChild !== typingCursor) {
+                letterContent.removeChild(letterContent.firstChild);
+            }
             typingCursor.style.display = 'inline-block';
             typeWriter();
         }
