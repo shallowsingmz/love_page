@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>致我最爱的你</title>
+    <style>
+        /* --- 全局样式 --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', 'SimSun', serif;
+            background: linear-gradient(135deg, #E0F7FA 0%, #FFC0CB 50%, #FFFFFF 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* --- 背景动画：爱心飘落 --- */
+        #hearts {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .floating-heart {
+            position: absolute;
+            top: -50px;
+            width: 20px;
+            height: 20px;
+            background: #FF69B4;
+            transform: rotate(45deg);
+            animation: fall linear forwards;
+            opacity: 0.8;
+        }
+
+        .floating-heart::before,
+        .floating-heart::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: #FF69B4;
+            border-radius: 50%;
+        }
+
+        .floating-heart::before { top: -10px; left: 0; }
+        .floating-heart::after { top: 0; left: -10px; }
+
+        @keyframes fall {
+            to { transform: translateY(110vh) rotate(45deg); opacity: 0; }
+        }
+
+        /* --- 背景动画：烟花 --- */
+        #fireworks {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* --- 信纸容器 --- */
+        .container {
+            position: relative;
+            z-index: 2;
+            max-width: 800px;
+            margin: 5vh auto;
+            padding: 40px 60px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(255, 105, 180, 0.3);
+            height: 85vh;
+            overflow-y: auto;
+            border: 2px solid #FFE4E1;
+        }
+
+        /* --- 标题与心跳 --- */
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 1px dashed #FFB6C1;
+            padding-bottom: 20px;
+        }
+
+        .header h1 {
+            color: #FF1493;
+            font-size: 2.2rem;
+            margin-bottom: 15px;
+        }
+
+        .heartbeat-icon {
+            display: inline-block;
+            font-size: 2.5rem;
+            animation: heartbeat 1s infinite;
+            color: #FF69B4;
+        }
+
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            25% { transform: scale(1.1); }
+            50% { transform: scale(1); }
+            75% { transform: scale(1.15); }
+        }
+
+        /* --- 情书内容 --- */
+        .letter-content {
+            color: #444;
+            font-size: 1.2rem;
+            line-height: 2;
+            text-align: justify;
+            white-space: pre-wrap; /* 保留换行 */
+        }
+
+        /* 打字光标 */
+        .cursor {
+            display: inline-block;
+            width: 2px;
+            height: 1.2em;
+            background: #FF69B4;
+            margin-left: 2px;
+            animation: blink 0.8s infinite;
+            vertical-align: text-bottom;
+        }
+
+        @keyframes blink {
+            0%, 49% { opacity: 1; }
+            50%, 100% { opacity: 0; }
+        }
+
+        /* --- 音乐控制 --- */
+        .music-box {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 10;
+            background: #fff;
+            padding: 10px 20px;
+            border-radius: 50px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            border: 1px solid #FFC0CB;
+        }
+
+        .music-btn {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: #FF1493;
+        }
+
+        /* 滚动条美化 */
+        .container::-webkit-scrollbar { width: 8px; }
+        .container::-webkit-scrollbar-track { background: #FFF0F5; border-radius: 10px; }
+        .container::-webkit-scrollbar-thumb { background: #FFB6C1; border-radius: 10px; }
+
+    </style>
+</head>
+<body>
+
+    <!-- 背景元素 -->
+    <div id="hearts"></div>
+    <canvas id="fireworks"></canvas>
+
+    <!-- 主体内容 -->
+    <div class="container">
+        <div class="header">
+            <h1>💕 致我最爱的你 💕</h1>
+            <div class="heartbeat-icon">❤️</div>
+        </div>
+        <div class="letter-content" id="text-output"></div>
+        <span class="cursor" id="cursor"></span>
+    </div>
+
+    <!-- 音乐播放器 -->
+    <div class="music-box" onclick="toggleMusic()">
+        <button class="music-btn" id="music-icon">🎵</button>
+        <span style="font-size: 0.9rem; color: #666;">点击播放</span>
+    </div>
+
+    <!-- 背景音乐 (请将 src 替换为你想要的音乐链接) -->
+    <audio id="bg-music" loop>
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+    
+
+    <script>
+        // =========================================================
+        // ==================== 在这里写下你的情书 ====================
+        // =========================================================
+        const loveLetter = `亲爱的宝贝：
+
+当我写下这些文字的时候，我的嘴角是不自觉上扬的。脑海里全是你的影子，你的笑容，你的声音。
+
+还记得我们第一次相遇的那天吗？虽然已经过去很久，但那个画面在我心里依然清晰如昨。从那一刻起，我就知道，我不想再让你从我生命中溜走。
+
+和你在一起的时光，无论是开心的大笑，还是偶尔的小吵闹，对我来说都是无比珍贵的宝藏。你总是能轻易地牵动我的情绪，让我因为你的一句关心而开心一整天。
+
+我不是一个完美的人，但我愿意为了你变得更好。我想做你的依靠，做你避风的港湾，做那个无论发生什么事，都会第一时间站在你身前的人。
+
+未来的路还很长，我想和你一起去看更多的风景，吃更多的美食，经历更多的故事。我想每天醒来都能看到你，想和你一起构建属于我们的小家庭。
+
+千言万语，汇成一句话：我爱你。很爱很爱。
+
+愿得一心人，白首不相离。
+
+永远爱你的男朋友
+2026年2月14日`;
+
+        // ==================== 打字效果逻辑 ====================
+        const textOutput = document.getElementById('text-output');
+        let charIndex = 0;
+        const typingSpeed = 60; // 打字速度 (毫秒)，数字越小越快
+
+        function typeWriter() {
+            if (charIndex < loveLetter.length) {
+                textOutput.textContent += loveLetter.charAt(charIndex);
+                charIndex++;
+                // 自动滚动到底部
+                document.querySelector('.container').scrollTop = document.querySelector('.container').scrollHeight;
+                setTimeout(typeWriter, typingSpeed);
+            } else {
+                // 打字结束后光标保持闪烁
+                document.getElementById('cursor').style.animationIterationCount = 'infinite';
+            }
+        }
+
+        // ==================== 爱心飘落逻辑 ====================
+        function createFloatingHeart() {
+            const heart = document.createElement('div');
+            heart.classList.add('floating-heart');
+            
+            // 随机位置、大小、颜色、速度
+            heart.style.left = Math.random() * 100 + 'vw';
+            const size = Math.random() * 15 + 10;
+            heart.style.width = size + 'px';
+            heart.style.height = size + 'px';
+            
+            const colors = ['#FF69B4', '#FFB6C1', '#FF1493', '#FFC0CB'];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            heart.style.background = color;
+            // 修复伪元素颜色（通过CSS变量或直接在JS中生成style比较麻烦，这里简化统一由CSS处理粉色系）
+            
+            const duration = Math.random() * 5 + 4; // 4-9秒飘落
+            heart.style.animationDuration = duration + 's';
+
+            document.getElementById('hearts').appendChild(heart);
+
+            // 移除DOM元素防止内存泄漏
+            setTimeout(() => {
+                heart.remove();
+            }, duration * 1000);
+        }
+
+        // ==================== 烟花逻辑 ====================
+        const canvas = document.getElementById('fireworks');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.color = color;
+                this.velocity = {
+                    x: (Math.random() - 0.5) * 6,
+                    y: (Math.random() - 0.5) * 6
+                };
+                this.alpha = 1;
+                this.decay = Math.random() * 0.015 + 0.005;
+            }
+            update() {
+                this.velocity.x *= 0.95;
+                this.velocity.y *= 0.95;
+                this.x += this.velocity.x;
+                this.y += this.velocity.y;
+                this.alpha -= this.decay;
+            }
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        function createFirework(x, y) {
+            const colors = ['#FF69B4', '#E0F7FA', '#FFFFFF', '#FFB6C1'];
+            for (let i = 0; i < 60; i++) {
+                particles.push(new Particle(x, y, colors[Math.floor(Math.random() * colors.length)]));
+            }
+        }
+
+        function animateFireworks() {
+            ctx.fillStyle = 'rgba(224, 247, 250, 0.1)'; // 拖尾效果
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            particles.forEach((p, index) => {
+                p.update();
+                p.draw();
+                if (p.alpha <= 0) particles.splice(index, 1);
+            });
+            requestAnimationFrame(animateFireworks);
+        }
+
+        // 定时放烟花
+        function autoFirework() {
+            const x = Math.random() * canvas.width;
+            const y = Math.random() * (canvas.height / 2);
+            createFirework(x, y);
+            setTimeout(autoFirework, Math.random() * 2000 + 1000);
+        }
+
+        // ==================== 音乐控制 ====================
+        let isMusicPlaying = false;
+        const audio = document.getElementById('bg-music');
+        const musicIcon = document.getElementById('music-icon');
+
+        function toggleMusic() {
+            if (!isMusicPlaying) {
+                audio.play();
+                musicIcon.textContent = '🔊';
+                isMusicPlaying = true;
+            } else {
+                audio.pause();
+                musicIcon.textContent = '🎵';
+                isMusicPlaying = false;
+            }
+        }
+
+        // ==================== 启动程序 ====================
+        window.onload = () => {
+            typeWriter(); // 开始打字
+            setInterval(createFloatingHeart, 400); // 开始飘爱心
+            animateFireworks(); // 开始烟花动画循环
+            autoFirework(); // 开始随机触发烟花
+        };
+
+    </script>
+</body>
+</html>
